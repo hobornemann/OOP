@@ -1,7 +1,8 @@
-.body-container{
+.main-container{
     background: white
 }
 
-.white-box{
+.footer-container{
     background-color: white;
+    z-index: 10;
 }
