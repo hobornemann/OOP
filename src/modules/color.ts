@@ -2,19 +2,7 @@
 // COLOR CLASS - OLD STYLE with separate Prototype functions
 //----------------------------------------------------------
 
-export interface Color {
-    r: number;
-    g: number;
-    b: number;
-    a?: number;
-}
-
-
-export function ColorClass(this: any, r: number, g: number, b: number, a?: number){
-    
-   /*  if (!this.isRGBInputValid(r, g, b, this.a)) {
-        throw new Error("One of the r-, g-, b-parameters is either missing, higher than 255, or lower than 0. Alternatively, the optional a-parameter may be lower than 0 or higher than 1. Please try again.");
-    } */
+export function Color(this: any, r: number, g: number, b: number, a?: number){
     this.r = r;
     this.g = g;
     this.b = b;
@@ -22,51 +10,104 @@ export function ColorClass(this: any, r: number, g: number, b: number, a?: numbe
 } 
 
 export function addPrototypeMethodsToColorClass(): void {
-
-/*     ColorClass.prototype.isRGBInputValid = function(this: any, r: number, g: number, b: number, a: number): boolean {
-        r = Math.round(r)
-        b = Math.round(g)
-        g = Math.round(b)
-        let isValid: boolean;
-        ( r < 0 || g < 0 || b < 0 || r > 255 || g > 255 || b > 255 || (a !== undefined && (a < 0 || a > 1)))? isValid = false : isValid = true;
-        return isValid
-     }*/
-    
-    
-    ColorClass.prototype.rgb = function(): string {
+  
+    Color.prototype.rgb = function(): string {
         return `rgb(${this.r}, ${this.g}, ${this.b})`;
     }
     
     
-    ColorClass.prototype.rgba = function(): string {
+    Color.prototype.rgba = function(): string {
         return `rgb(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
     }   
     
 
-    ColorClass.prototype.hex = function(): string {
-        this.a = (typeof this.a !== 'undefined') ? this.a : 1;
-/*         this.a = Math.round(this.a * 255) */
+    Color.prototype.hex = function(): string {
+        this.a = (this.a !== undefined) ? this.a : 1;
         const toHex = (c: number) => {
             const hex = Math.round(c).toString(16);
             return hex.length === 1 ? '0' + hex : hex;
         };
-
         const alphaHex = Math.round(this.a * 255); // Round alpha value to the nearest integer
-
         return `#${toHex(this.r)}${toHex(this.g)}${toHex(this.b)}${toHex(alphaHex)}`;
-
-        /* return `#${toHex(this.r)}${toHex(this.g)}${toHex(this.b)}${Math.round(this.a * 255).toString(16)}`; */
     } 
-
 }    
 
 
 
+
+//----------------------------------------------------------------
+// COLOR - FUNCTIONS 
+//----------------------------------------------------------------
+
+export function initiateColorApp(): void {
+    addPrototypeMethodsToColorClass()
+    const changeBackgroundColorButton = document.querySelector(".change-background-color-button") as HTMLElement
+    changeBackgroundColorButton?.addEventListener('click', changeBackgroundColor);
+}
+
+
+function changeBackgroundColor(event: Event): void {
+
+    try{
+        event.preventDefault();
+        const redValueFloat = parseFloat((document.getElementById('redInput') as HTMLInputElement).value);
+        const greenValueFloat = parseFloat((document.getElementById('greenInput') as HTMLInputElement).value);
+        const blueValueFloat = parseFloat((document.getElementById('blueInput') as HTMLInputElement).value);
+        const opacityInputString = document.getElementById('opacityInput') as HTMLInputElement;
+        const opacityValueFloat = opacityInputString.value ? parseFloat(opacityInputString.value) : 1;
+        const errorMessageElement = document.getElementById('errorMessage');
+        const mainContainerElement = document.querySelector(".main-container") as HTMLElement;
+        const rgbMethodPElement = document.querySelector(".rgb-method-p") as HTMLParagraphElement;
+        const rgbaMethodPElement = document.querySelector(".rgba-method-p") as HTMLParagraphElement;
+        const hexMethodPElement = document.querySelector(".hex-method-p") as HTMLParagraphElement;
     
-/*     ColorClass.prototype.hex = function(): string {
-        const redHex = this.r.toString(16).padStart(2, '0');
-        const greenHex = this.g.toString(16).padStart(2, '0');
-        const blueHex = this.b.toString(16).padStart(2, '0');
-        return `#${redHex}${greenHex}${blueHex}`;
-    }     */
+        if(errorMessageElement && mainContainerElement){
+            if (redValueFloat < 0 || redValueFloat > 255 || greenValueFloat < 0 || greenValueFloat > 255 || blueValueFloat < 0 || blueValueFloat > 255 || (opacityValueFloat !== undefined && (opacityValueFloat < 0 || opacityValueFloat > 1))) {
+                mainContainerElement.style.backgroundColor = "white"
+                rgbMethodPElement.style.color ="black"
+                rgbaMethodPElement.style.color ="black"
+                hexMethodPElement.style.color ="black"
+                errorMessageElement.innerText = 'Ouups! One or more input values are out of bounds. Please try again!';
+                errorMessageElement.style.display = 'block';
+            } else {
+                errorMessageElement.style.display = 'none';
+                processInputs(redValueFloat, greenValueFloat, blueValueFloat, opacityValueFloat);
+            }
+        }
+    } 
+    catch(error: unknown){
+        console.error("Error: ", error)
+        throw error
+    }
+}
+
+
+function processInputs(redInput: number, greenInput: number, blueInput: number, opacityInput: number) {
+    try {
+        const bodyContainerElement = document.querySelector(".main-container") as HTMLElement;
+        const rgbMethodPElement = document.querySelector(".rgb-method-p") as HTMLParagraphElement;
+        const rgbaMethodPElement = document.querySelector(".rgba-method-p") as HTMLParagraphElement;
+        const hexMethodPElement = document.querySelector(".hex-method-p") as HTMLParagraphElement;
+    
+        const myColor = new (Color as any)(redInput, greenInput, blueInput, opacityInput);
+        bodyContainerElement.style.backgroundColor = myColor.rgba();
+    
+        const rgbMethodString = myColor.rgb();
+        const rgbaMethodString = myColor.rgba();
+        const hexMethodString = myColor.hex();
+    
+        rgbMethodPElement.style.color = rgbMethodString;
+        rgbaMethodPElement.style.color = rgbaMethodString;
+        hexMethodPElement.style.color = hexMethodString;
+    
+        rgbMethodPElement.textContent = `This font-color was generated by the rgb()-method. The color styling string used was: ${rgbMethodString}`;  
+        rgbaMethodPElement.textContent = `This font-color was generated by the rgba()-method. The color styling string used was: ${rgbaMethodString}`; 
+        hexMethodPElement.textContent = `This font-color was generated by the hex()-method. The color styling string used was: ${hexMethodString}`; 
+    }
+    catch(error: unknown) {
+        console.error("Error: ", error);
+        throw error;
+    }
+}
+
 
