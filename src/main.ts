@@ -1,5 +1,6 @@
 import { initiateColorApp } from './modules/color'
-import { initiatePokerApp } from './modules/poker-controller'
+import { Game } from './modules/poker-model'
+import {} from './modules/poker-controller'
 
 
 
@@ -11,6 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // COLOR
     initiateColorApp();
     // POKER
-    initiatePokerApp();
+    const myGame = new Game()
+    myGame.startGame();
 })
 

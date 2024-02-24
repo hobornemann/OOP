@@ -15,22 +15,15 @@ import {Card, Color, Face, Value} from '../types/poker'
 
 export class Deck {
     
-    newDeck: Card[];
-    shuffledDeck: Card[];
     currentDeck: Card[];
-    distributedDeck: Card[];
 
     constructor() {
-        // Initialize properties
-        this.newDeck = this.openNewDeck();
-        this.shuffledDeck = [];
-        this.currentDeck = [];
-        this.distributedDeck = [];
+        this.currentDeck = this.getNewDeck();
     }
 
-    openNewDeck() {
+    getNewDeck() {
         const colorArray: Color[] = ['Clubs', 'Spades', 'Hearts', 'Diamonds'];
-        const faceArray: Face[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace'];
+        const faceArray: Face[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         const valueArray: Value[] = [2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 , 12 , 13 , 14 ];
         let faceValueArray = [];
         let newDeck: Card[] = [];
@@ -48,28 +41,126 @@ export class Deck {
         }
         this.currentDeck = newDeck;
         return newDeck
+    }   
+}
+
+
+
+export class Dealer {
+
+    deck: Deck;
+    trashDeck: Card[];
+    dealerProcess: string[];
+
+    constructor() {
+        this.deck = new Deck();
+        this.trashDeck = [];
+        this.dealerProcess = [
+            "shuffleDeck",
+            "isThereAreEnoughCardsInTheDeckForARound",
+            "distributeFiveCardsToEachPlayer",
+            "calculateAndShowTheScoreOfEachPlayersHand",
+            "distributeTwoCardsToEachPlayer",
+            "calculateAndShowTheScoreOfEachPlayersHand",
+            "determineAndCommunicateWhichPlayerWonTheRound",
+            "askPlayersThrowAllTheirCardsToTrashDeck",
+            "transferAllCardsInTrashDeckToCurrentDeck"
+        ];
     }
 
 
-    showCurrentDeck() {
-        for (const card of this.currentDeck) {
-            console.log(card);
-        }
+
+
+
+    shuffleDeck(cards: Card[]) {
+        cards.map(card => {
+            card.sortValue = Math.random()
+        })
+        const shuffledDeck: Card[]  = cards.sort((a, b) => a.sortValue - b.sortValue)
+        console.log("shuffledDeck",shuffledDeck);
+        return shuffledDeck
+    }
+    
+
+    isThereAreEnoughCardsInTheDeckForARound(){
+
+    }
+    
+
+    distributeFiveCardsToEachPlayer(){
+
+    }
+
+    calculateAndShowTheScoreOfEachPlayersHand(){
+
+    }
+
+    askPlayersToThrowAwayTwoCardsEachToTrashDeck(){
+
+    }
+
+    distributeTwoCardsToEachPlayer(){
+
     }
 
 
-    showDeck(deck: Card[]) {
-        for (const card of deck) {
-            console.log(card);
-        }
+    determineAndCommunicateWhichPlayerWonTheRound(){
+
     }
 
+    askPlayersThrowAllTheirCardsToTrashDeck(){
 
-    shuffleDeck(deck: Card[]) {
-        deck.forEach(card => card.sortValue = Math.random())
-        this.shuffledDeck = deck.sort()
-        return this.shuffledDeck
     }
+
+    transferAllCardsInTrashDeckToCurrentDeck(){
+
+    }
+    
+}
+
+
+
+
+export class Game {
+    
+    players: Player[];
+    dealer: Dealer;
+    gameProcess: string[];
+
+    constructor(){
+        this.players = [];
+        this.dealer = this.addDealer();
+        this.gameProcess = [
+            "checkWhoWantsToPlay",
+            "registerThePlayers"
+        ]
+    }
+
+    startGame(){
+
+        // 
+        // game-loop
+        // I varje runda ska spelarna kunna välja vilka kort de vill slänga  (indexplats)
+
+    }
+
+    addPlayer(newPlayer: Player): Player[]{
+        this.players.push(newPlayer)
+        return this.players
+    }
+
+    addPlayers(newPlayers: Player[]){
+        // uppmana användaren att skriva in antalet spelare (minst 2) och deras namn
+        // skapar motsvarande antal instanser av Player-klassen
+
+        return this.players
+    }
+
+    addDealer(): Dealer{
+        let dealer: Dealer = new Dealer()
+        return dealer
+    }
+
 }
 
 
@@ -85,12 +176,12 @@ export class Deck {
 
 
 export class Player {
-    playerName: string;
+    name: string;
     currentHand: Card[];
     points: number
 
     constructor(playerName: string){
-        this.playerName = playerName;
+        this.name = playerName;
         this.currentHand = [];
         this.points = 0;
     }
@@ -101,13 +192,64 @@ export class Player {
 
 }
 
-export class Validation{
-    private constructor(){}
-    static evaluatePlayersHands(players: Player[]){
+export class MiscMethods{
+
+    /*  static evaluatePlayersHands(players: Player[]){
         //TODO:
 
+    } */
 
+
+    static printOutCards(cards: Card[], htmlElement?: HTMLElement): void {
+        
+
+        for (const card of cards) {
+            console.log(`${card.name}, ${card.value}`);  
+            // console.log(card);     // Uncomment, if you rather would likt print out the full card object.
+        }
+
+        let html: string = "";
+        if(htmlElement){
+            for (const card of cards) {   
+                html += `<p>${card.name}, ${card.value}</p>`;
+            }
+            htmlElement.innerHTML = html;
+        } else{
+            console.error(`Cannot find the HTML-Element ${htmlElement}`)
+            throw new Error
+        }
     }
+
+
+    static calculatePointsOnHand(cards: Card[]): Number{
+        let arrayOfPoints: number[] = cards.map(card => {
+            return card.value
+        })
+        const points: number = arrayOfPoints.reduce((acc, curr)=>(acc + curr),0)
+        return points
+    }
+
+
+    static addPlayerHtmlCard(player: Player){
+
+        const playerCardsElement = document.querySelector(".player-cards")
+        if(playerCardsElement){
+            let html = playerCardsElement.innerHTML
+            html += `
+                <div class="player-card">
+                    <h4 class="player-name">${player.name}</h4>
+                    <div class="player-hand">
+                    </div>
+                    <div class="player-points-total">
+                        <h5>Points:</h5>
+                        <p class="player-points">                    
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
 
 }
 

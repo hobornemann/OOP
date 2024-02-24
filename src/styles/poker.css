@@ -4,6 +4,9 @@
     margin: 0;
     box-sizing: border-box;
 }
+p{
+    font-size: 14px;
+}
 
 .navigation{
     display: flex;
@@ -11,6 +14,14 @@
     gap: 3vw;
     margin-bottom: 2vh;
 }
+
+.tasks{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+
 .main-container{
     display: flex;
     flex-direction: column;
@@ -70,3 +81,45 @@
     width: 40vw;
 }
 
+
+/* POP-UP - ADD NUMBER OF PLAYERS */
+
+.popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f1f1f1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    z-index: 999;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* ------------------- */
