@@ -1,0 +1,72 @@
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.navigation{
+    display: flex;
+    flex-direction: row;
+    gap: 3vw;
+    margin-bottom: 2vh;
+}
+.main-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.players-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.add-new-player{
+    display: flex;
+    flex-direction: row;
+}
+
+.player-cards{
+    display: flex;
+    flex-direction: row;
+    margin-top: 2vh;
+}
+
+.player-card{
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(20,20,20,0.05);
+    padding: 1vh;
+}
+
+.player-points-total{
+    display: flex;
+    flex-direction: row;
+}
+
+
+.dealer-container{
+    display: flex;
+    flex-direction: column;
+    margin-top: 2vh;
+}
+
+.deck-cards{
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+}
+
+.deck-card{
+    display: flex;
+    flex-direction: column;
+}
+
+.button{
+    width: 40vw;
+}
+
+.new-player-name-input{
+    width: 40vw;
+}
+
