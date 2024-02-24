@@ -104,7 +104,7 @@ export class Player {
 export class Validation{
     private constructor(){}
     static evaluatePlayersHands(players: Player[]){
-        players.
+        //TODO:
 
 
     }
