@@ -179,17 +179,20 @@ export class Game {
     
     players: Player[];
     dealer: Dealer;
+    roundNumber: number;
 
     constructor(){
         this.players = [];
         this.dealer = this.addDealer();
+        this.roundNumber = 0;
     }
 
     async startGame(game: Game){
 
         try {
             await this.addPlayers(game)
-            if(game.players.length > 0){
+
+            if(game.players.length > 0){               
                 console.log("Get new deck:");
                 const deck1 = new Deck();  
                 const newDeck = deck1.getNewDeck();
@@ -199,38 +202,16 @@ export class Game {
                 const shuffledDeck = game.dealer.shuffleDeck(game.dealer.deck.mainDeck);
                 game.dealer.deck.mainDeck = shuffledDeck.map(card => ({ ...card }));  
                 MiscMethods.reportStatusOfTheGame(game);
-                console.log("Distributing 5 cards to each player:");
-                game.dealer.distributeXCardsToEachPlayer(game, 5);
-                MiscMethods.reportStatusOfTheGame(game);
-                
-                
-                await this.dealer.askPlayersToThrowAwayTwoCards(game)
-                
-                
-
-              /*   game.players.map(player => {
-                    player.throwAwayTheTwoLowestCards(game)
-                }) */
-
-               /*  this.dealer.playerTurn("Player 1"); // TODO: */
-
-
-                MiscMethods.reportStatusOfTheGame(game);
-                console.log("Distributing 2 new cards to each player:");
-                game.dealer.distributeXCardsToEachPlayer(game, 2);
-                MiscMethods.reportStatusOfTheGame(game);
-                console.log("Determining and announcing the winner:");
-                game.dealer.announceTheWinner(game)
-                console.log("Players throwing away all their cards (to trashDeck):");
-                for (const player of game.players){
-                    player.throwAwayAllCards(game)
-                }
-                MiscMethods.reportStatusOfTheGame(game);
+                console.log("this.players.length * 7: ",this.players.length * 7)
+                console.log("this.dealer.deck.mainDeck.length:",this.dealer.deck.mainDeck.length);
+                while(this.players.length * 7 < this.dealer.deck.mainDeck.length){
+                    this.playAnotherRound(game)
+                } 
                 console.log("Moving trashDeck into mainDeck:");
                 game.dealer.moveTrashDeckIntoMainDeck()    
                 MiscMethods.reportStatusOfTheGame(game);
-
-
+                return
+                
             } else {
                 console.log("Please register your players first.");
                 //alert("Please register your players first.");
@@ -238,10 +219,29 @@ export class Game {
         } catch (error) {
             console.error("An error occurred:", error); 
         }
-        // game-loop
-        // I varje runda ska spelarna kunna välja vilka kort de vill slänga  (indexplats)
     }
 
+
+    async playAnotherRound(game: Game){
+        this.roundNumber = this.roundNumber + 1
+        console.log(`Round No: ${this.roundNumber}`);
+        console.log("Distributing 5 cards to each player:");
+        game.dealer.distributeXCardsToEachPlayer(game, 5);
+        MiscMethods.reportStatusOfTheGame(game);
+        await this.dealer.askPlayersToThrowAwayTwoCards(game)
+        MiscMethods.reportStatusOfTheGame(game);
+        console.log("Distributing 2 new cards to each player:");
+        game.dealer.distributeXCardsToEachPlayer(game, 2);
+        MiscMethods.reportStatusOfTheGame(game);
+        console.log("Determining and announcing the winner:");
+        game.dealer.announceTheWinner(game)
+        console.log("Players throwing away all their cards (to trashDeck):");
+        for (const player of game.players){
+            player.throwAwayAllCards(game)
+        }
+        MiscMethods.reportStatusOfTheGame(game);
+        return
+    }
 
 
     getPlayerNames(numPlayers: number): Promise<string[]> {

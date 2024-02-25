@@ -27,9 +27,7 @@ const task2Button = document.querySelector(".task-2");
 const task3Button = document.querySelector(".task-3");
 const task4Button = document.querySelector(".task-4");
 const task5Button = document.querySelector(".task-5");
-const task6Button = document.querySelector(".task-6");
-const task7Button = document.querySelector(".task-7");
-const task8Button = document.querySelector(".task-8");
+
 
 const numberOfPlayersButton = document.querySelector(".number-of-players-button") as HTMLButtonElement
 const numberOfPlayersInput = document.querySelector(".number-of-players-input") as HTMLInputElement
@@ -105,21 +103,10 @@ task4Button?.addEventListener('click', () => {
 
 
 task5Button?.addEventListener('click', () => {
-    alert("Tasks 5 & 6 had been done for previous tasks already. Please continue with Task 7.")
-})
-
-task6Button?.addEventListener('click', () => {
-    alert("Tasks 5 & 6 had been done for previous tasks already. Please continue with Task 7.")
-})
-
-task7Button?.addEventListener('click', () => {
-   
+    alert("Tasks 5 - 8 can be seen in the code and via the prompts.")
 })
 
 
-task8Button?.addEventListener('click', () => {
-
-})
 
 
 
