@@ -8,11 +8,9 @@ import {} from './modules/poker-controller'
 // ONLOAD - FOR BOTH ASSIGNMENTS 
 //----------------------------------------------------------------
 
-window.addEventListener("DOMContentLoaded", () => {
-    // COLOR
-    initiateColorApp();
-    // POKER
-    const myGame = new Game()
-    myGame.startGame();
-})
+// COLOR
+initiateColorApp();
 
+// POKER
+export const game = new Game()
+game.startGame()

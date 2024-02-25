@@ -7,9 +7,11 @@ View based on changes in the Model should be placed in the Controller. These cla
 */
 
 
-import {Game, MiscMethods, Player} from './poker-model'
+import {MiscMethods, Player, Deck} from './poker-model'
 import {} from './poker-view'
-import{Card} from '../types/poker'
+import {game} from '../main'
+import {Card} from '../types/poker'
+
 
 
 
@@ -37,10 +39,8 @@ export function initiatePokerGame(){
 // EVENT-LISTENERS 
 //----------------------------------------------------------------
 
-const task1aButton = document.querySelector(".task-1a");
-const task1bButton = document.querySelector(".task-1b");
-const task2aButton = document.querySelector(".task-2a");
-const task2bButton = document.querySelector(".task-2b");
+const task1Button = document.querySelector(".task-1");
+const task2Button = document.querySelector(".task-2");
 const task3Button = document.querySelector(".task-3");
 const task4Button = document.querySelector(".task-4");
 const task5Button = document.querySelector(".task-5");
@@ -48,88 +48,85 @@ const task6Button = document.querySelector(".task-6");
 const task7Button = document.querySelector(".task-7");
 const task8Button = document.querySelector(".task-8");
 
-const currentDeckElement = document.querySelector(".current-deck") as HTMLElement
-
-
-const game = new Game();
-let currentDeck: Card[] = game.dealer.deck.currentDeck;
+const mainDeckElement = document.querySelector(".current-deck") as HTMLElement
 
 
 
-task1aButton?.addEventListener('click', () => {
-    MiscMethods.printOutCards(currentDeck, currentDeckElement)
-})
+
+/* console.log("typeof game.dealer.deck.mainDeck:",typeof game.dealer.deck.mainDeck);
+console.log("game.dealer.deck.mainDeck.length:",game.dealer.deck.mainDeck.length);
+console.log("game.dealer.deck.mainDeck", game.dealer.deck.mainDeck);
+ */
+/* let mainDeck: Card[] = game.dealer.deck.mainDeck;
+console.log("mainDeck::",mainDeck);
+
+let trashDeck: Card[] = game.dealer.deck.trashDeck; 
+console.log("mainDeck::",trashDeck); */
 
 
-task1bButton?.addEventListener('click', () => {
-    const shuffledDeck = game.dealer.shuffleDeck(currentDeck)
-    currentDeck = {...shuffledDeck}
-    MiscMethods.printOutCards(shuffledDeck, currentDeckElement)
-})
 
 
-task2aButton?.addEventListener('click', () => {
+
+
+
+task1Button?.addEventListener('click', () => {
+    console.log(">> TASK 1:");
+    console.log("New deck:");
+    const deck1 = new Deck();  
+    const newDeck = deck1.getNewDeck();
+    MiscMethods.printOutCards(newDeck, mainDeckElement);
+    game.dealer.deck.mainDeck = newDeck.map(card => ({ ...card }));   
+    console.log("Shuffled mainDeck:");
+    game.dealer.deck.mainDeck = game.dealer.shuffleDeck(game.dealer.deck.mainDeck);
+    MiscMethods.printOutCards(game.dealer.deck.mainDeck.map(card => ({...card})), mainDeckElement);
+});
+
+
+
+task2Button?.addEventListener('click', () => {
+    console.log(">> TASK 2:");
     const slim = new Player("Slim")
     const luke = new Player("Luke")
-    console.log("Slim: ",slim);
-    console.log("Luke:", luke);
     game.addPlayer(slim)
     game.addPlayer(luke)
-  /*   MiscMethods.addPlayerHtmlCard(slim)
-    MiscMethods.addPlayerHtmlCard(luke) */
-    let currentDeck: Card[] = game.dealer.deck.currentDeck;
-    console.log("typeof currentDeck:",typeof currentDeck);
-    console.log("currentDeck",currentDeck);
-
-
+   /*  console.log("Slim: ", slim);
+    console.log("Luke:", luke); */
+    // Dela ut fem kort till varje spelare
+    game.dealer.distributeXCardsToEachPlayer(game, 5);
+    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
 })
-
-
-
-task2bButton?.addEventListener('click', () => {
-    // Deal five cards to each player
-    let currentDeck: Card[] = game.dealer.deck.currentDeck;
-    console.log("typeof currentDeck:",typeof currentDeck);
-    console.log("currentDeck",currentDeck);
-    console.log("game.players",game.players);
-      
-    
-    for (let i = 0; i < 5; i++) {
-        // Check if currentDeck is empty
-        if (currentDeck.length === 0) {
-            console.error("Error: currentDeck is empty!");
-            break; // Exit the loop if currentDeck is empty
-        }
-        // Distribute cards to each player
-        game.players.forEach(player => {
-            const card = game.dealer.deck.currentDeck.pop(); // Remove and get the last card from currentDeck
-            if (card) {
-                player.currentHand.push(card); // Add the card to the player's hand
-            }
-        });
-    }
-
-    // Log the remaining deck and players' hands
-    console.log("currentDeck after distributing five cards to each player:", currentDeck);
-    game.players.forEach(player => {
-        console.log(`Player: ${player.name}`)
-        player.currentHand.map(card => {
-            console.log(`${card.name} - ${card.value}`);
-        })
-        console.log(`Points: ${MiscMethods.calculatePointsOnHand(player.currentHand)}`);
-    });
-})
-
 
 
 
 task3Button?.addEventListener('click', () => {
-
+    console.log(">> TASK 3:");
+    game.players.map(player => {
+        player.throwAwayTheTwoLowestCards(game)
+    })
+    game.dealer.distributeXCardsToEachPlayer(game, 2);
+    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
 })
 
 
 task4Button?.addEventListener('click', () => {
-
+    console.log(">> TASK 4:");
+    // låt spelarna slänga alla sina kort i kasthögen
+    game.players.map(player => {
+        player.throwAwayAllCards(game)
+    })
+    console.log("Status after players have thrown away all cards to trashDeck (TASK 4a):");
+    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    // flytta alla kort från kasthögen till kortleken
+    game.dealer.moveTrashDeckIntoMainDeck()
+    // rapportera status
+    console.log("Status after trashDeck moved into mainDeck (Task 4b):");
+    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    // blanda korthögen igen
+    const shuffledDeck: Card[] = game.dealer.shuffleDeck(game.dealer.deck.mainDeck)
+    game.dealer.deck.mainDeck = shuffledDeck.map(card => ({...card}))
+    console.log("Status after mainDeck has been shuffled (Task 4c):");
+    // rapportera status igen
+    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
 })
 
 

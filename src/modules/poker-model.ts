@@ -8,20 +8,24 @@ business logic components, and any other classes related to managing the applica
 import {} from './poker-controller'
 import {} from './poker-view'
 import {Card, Color, Face, Value} from '../types/poker'
+//import { mainDeck, trashDeck } from './poker-controller';
 
 //----------------------------------------------------------------
 // CLASSES 
 //----------------------------------------------------------------
 
+
 export class Deck {
-    
-    currentDeck: Card[];
+    mainDeck: Card[];
+    trashDeck: Card[];
 
     constructor() {
-        this.currentDeck = this.getNewDeck();
+        this.mainDeck = this.getNewDeck();
+        this.trashDeck = [];
     }
 
-    getNewDeck() {
+
+     getNewDeck(): Card[] {
         const colorArray: Color[] = ['Clubs', 'Spades', 'Hearts', 'Diamonds'];
         const faceArray: Face[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         const valueArray: Value[] = [2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10 , 11 , 12 , 13 , 14 ];
@@ -34,88 +38,64 @@ export class Deck {
 
         for (const color of colorArray) {
             for (const faceValue of faceValueArray) {
-                let i = 0;
-                newDeck.push({name: `${color}_${faceValue.face}`, value: faceValue.value, color: color, face: faceValue.face, sortValue: i}); 
-                i++;
+                
+                newDeck.push({
+                    name: `${color}_${faceValue.face}`, 
+                    value: faceValue.value, color: color, 
+                    face: faceValue.face, 
+                    sortValue: 0
+                }); 
             }
         }
-        this.currentDeck = newDeck;
-        return newDeck
-    }   
-}
 
+        for (let i = 0; i < newDeck.length; i++) {
+            newDeck[i].sortValue = i 
+        };
+
+        this.mainDeck = newDeck;
+        return newDeck
+    }        
+}
 
 
 export class Dealer {
 
     deck: Deck;
-    trashDeck: Card[];
-    dealerProcess: string[];
 
     constructor() {
         this.deck = new Deck();
-        this.trashDeck = [];
-        this.dealerProcess = [
-            "shuffleDeck",
-            "isThereAreEnoughCardsInTheDeckForARound",
-            "distributeFiveCardsToEachPlayer",
-            "calculateAndShowTheScoreOfEachPlayersHand",
-            "distributeTwoCardsToEachPlayer",
-            "calculateAndShowTheScoreOfEachPlayersHand",
-            "determineAndCommunicateWhichPlayerWonTheRound",
-            "askPlayersThrowAllTheirCardsToTrashDeck",
-            "transferAllCardsInTrashDeckToCurrentDeck"
-        ];
     }
-
-
-
-
 
     shuffleDeck(cards: Card[]) {
         cards.map(card => {
             card.sortValue = Math.random()
         })
-        const shuffledDeck: Card[]  = cards.sort((a, b) => a.sortValue - b.sortValue)
-        console.log("shuffledDeck",shuffledDeck);
-        return shuffledDeck
+        const shuffledCards: Card[]  = cards.sort((a, b) => a.sortValue - b.sortValue)
+        cards = shuffledCards.map(card => ({...card})) 
+        return cards
     }
     
-
-    isThereAreEnoughCardsInTheDeckForARound(){
-
-    }
     
-
-    distributeFiveCardsToEachPlayer(){
-
+    distributeXCardsToEachPlayer(game: Game, numberOfCards: number) {
+        
+        const requiredNumberOfCards = numberOfCards * game.players.length       
+        if (this.deck.mainDeck.length >= requiredNumberOfCards){
+            for (let i = 0; i < numberOfCards; i++) {
+                for(const player of game.players){
+                    const card = this.deck.mainDeck.pop() as Card;
+                    player.currentHand.push(card);
+                }
+            }
+        } else {
+            console.error("Error: not enough cards in the current deck")
+        }
     }
 
-    calculateAndShowTheScoreOfEachPlayersHand(){
 
+    moveTrashDeckIntoMainDeck(){
+        this.deck.mainDeck.push(...this.deck.trashDeck)
+        this.deck.trashDeck = []
     }
-
-    askPlayersToThrowAwayTwoCardsEachToTrashDeck(){
-
-    }
-
-    distributeTwoCardsToEachPlayer(){
-
-    }
-
-
-    determineAndCommunicateWhichPlayerWonTheRound(){
-
-    }
-
-    askPlayersThrowAllTheirCardsToTrashDeck(){
-
-    }
-
-    transferAllCardsInTrashDeckToCurrentDeck(){
-
-    }
-    
 }
 
 
@@ -148,13 +128,13 @@ export class Game {
         this.players.push(newPlayer)
         return this.players
     }
-
+/* 
     addPlayers(newPlayers: Player[]){
         // uppmana användaren att skriva in antalet spelare (minst 2) och deras namn
         // skapar motsvarande antal instanser av Player-klassen
 
         return this.players
-    }
+    } */
 
     addDealer(): Dealer{
         let dealer: Dealer = new Dealer()
@@ -186,27 +166,33 @@ export class Player {
         this.points = 0;
     }
 
-    throwAwayTwoCards(){
-
+ 
+    throwAwayTheTwoLowestCards(game: Game){
+        if(this.currentHand){
+            const sortedHandDescending = this.currentHand.sort((a,b)=> (b.value - a.value))
+            const firstCardToTrash = sortedHandDescending.pop()
+            const secondCardToTrash = sortedHandDescending.pop()
+            if(firstCardToTrash && secondCardToTrash){
+                game.dealer.deck.trashDeck.push(firstCardToTrash, secondCardToTrash);
+            }
+            this.currentHand = sortedHandDescending.map(card => ({...card}))
+        }
     }
 
+    throwAwayAllCards(game: Game){
+        if(this.currentHand){
+            game.dealer.deck.trashDeck.push(...this.currentHand)
+        }
+        this.currentHand = []
+    }
 }
+
+
 
 export class MiscMethods{
 
-    /*  static evaluatePlayersHands(players: Player[]){
-        //TODO:
-
-    } */
-
-
     static printOutCards(cards: Card[], htmlElement?: HTMLElement): void {
-        
-
-        for (const card of cards) {
-            console.log(`${card.name}, ${card.value}`);  
-            // console.log(card);     // Uncomment, if you rather would likt print out the full card object.
-        }
+        console.log(cards)
 
         let html: string = "";
         if(htmlElement){
@@ -228,6 +214,22 @@ export class MiscMethods{
         const points: number = arrayOfPoints.reduce((acc, curr)=>(acc + curr),0)
         return points
     }
+
+
+    static  reportStatusOfDecksAndPlayerHands(game: Game){
+        // Log the current deck, players' hands and trashdeck
+        console.log("MainDeck: ", game.dealer.deck.mainDeck.map(card => ({...card})));
+        console.log("TrashDeck: ", game.dealer.deck.trashDeck.map(card => ({...card})));
+        game.players.forEach(player => {
+        console.log(`Player: ${player.name}`)
+        player.currentHand.map(card => {
+            console.log(`${card.name} - ${card.value}`);
+        })
+        console.log(`Points: ${MiscMethods.calculatePointsOnHand(player.currentHand)}`);
+    });
+    }
+
+
 
 
     static addPlayerHtmlCard(player: Player){
