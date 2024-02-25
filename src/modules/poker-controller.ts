@@ -15,23 +15,6 @@ import {Card} from '../types/poker'
 
 
 
-export function initiatePokerGame(){
-
-
-    //const myDeck = new Deck();
-    //console.log("myDeck:",myDeck);
-    //myDeck.getNewDeck();
-    //myDeck.printOutCards(); 
-    
-}
-
-
-
-//----------------------------------------------------------------
-// CLASSES 
-//----------------------------------------------------------------
-
-
 
 
 
@@ -48,23 +31,13 @@ const task6Button = document.querySelector(".task-6");
 const task7Button = document.querySelector(".task-7");
 const task8Button = document.querySelector(".task-8");
 
-const mainDeckElement = document.querySelector(".current-deck") as HTMLElement
+const numberOfPlayersButton = document.querySelector(".number-of-players-button") as HTMLButtonElement
+const numberOfPlayersInput = document.querySelector(".number-of-players-input") as HTMLInputElement
+const addNewPlayersElement = document.querySelector(".add-new-players") as HTMLElement
+const addNewPlayersButton = document.querySelector(".add-new-players-button") as HTMLButtonElement
+//const dealerNextStepButton = document.querySelector(".dealer-next-step-button") as HTMLButtonElement
 
-
-
-
-/* console.log("typeof game.dealer.deck.mainDeck:",typeof game.dealer.deck.mainDeck);
-console.log("game.dealer.deck.mainDeck.length:",game.dealer.deck.mainDeck.length);
-console.log("game.dealer.deck.mainDeck", game.dealer.deck.mainDeck);
- */
-/* let mainDeck: Card[] = game.dealer.deck.mainDeck;
-console.log("mainDeck::",mainDeck);
-
-let trashDeck: Card[] = game.dealer.deck.trashDeck; 
-console.log("mainDeck::",trashDeck); */
-
-
-
+//const userInfoElement = document.querySelector(".user-info") as HTMLElement
 
 
 
@@ -74,11 +47,12 @@ task1Button?.addEventListener('click', () => {
     console.log("New deck:");
     const deck1 = new Deck();  
     const newDeck = deck1.getNewDeck();
-    MiscMethods.printOutCards(newDeck, mainDeckElement);
-    game.dealer.deck.mainDeck = newDeck.map(card => ({ ...card }));   
+    game.dealer.deck.mainDeck = newDeck.map(card => ({ ...card }));  
+    MiscMethods.reportStatusOfTheGame(game);
     console.log("Shuffled mainDeck:");
-    game.dealer.deck.mainDeck = game.dealer.shuffleDeck(game.dealer.deck.mainDeck);
-    MiscMethods.printOutCards(game.dealer.deck.mainDeck.map(card => ({...card})), mainDeckElement);
+    const shuffledDeck = game.dealer.shuffleDeck(game.dealer.deck.mainDeck);
+    game.dealer.deck.mainDeck = shuffledDeck.map(card => ({ ...card }));  
+    MiscMethods.reportStatusOfTheGame(game);
 });
 
 
@@ -93,7 +67,7 @@ task2Button?.addEventListener('click', () => {
     console.log("Luke:", luke); */
     // Dela ut fem kort till varje spelare
     game.dealer.distributeXCardsToEachPlayer(game, 5);
-    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    MiscMethods.reportStatusOfTheGame(game);
 })
 
 
@@ -104,7 +78,7 @@ task3Button?.addEventListener('click', () => {
         player.throwAwayTheTwoLowestCards(game)
     })
     game.dealer.distributeXCardsToEachPlayer(game, 2);
-    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    MiscMethods.reportStatusOfTheGame(game);
 })
 
 
@@ -115,32 +89,33 @@ task4Button?.addEventListener('click', () => {
         player.throwAwayAllCards(game)
     })
     console.log("Status after players have thrown away all cards to trashDeck (TASK 4a):");
-    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    MiscMethods.reportStatusOfTheGame(game);
     // flytta alla kort från kasthögen till kortleken
     game.dealer.moveTrashDeckIntoMainDeck()
     // rapportera status
     console.log("Status after trashDeck moved into mainDeck (Task 4b):");
-    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    MiscMethods.reportStatusOfTheGame(game);
     // blanda korthögen igen
     const shuffledDeck: Card[] = game.dealer.shuffleDeck(game.dealer.deck.mainDeck)
     game.dealer.deck.mainDeck = shuffledDeck.map(card => ({...card}))
     console.log("Status after mainDeck has been shuffled (Task 4c):");
     // rapportera status igen
-    MiscMethods.reportStatusOfDecksAndPlayerHands(game);
+    MiscMethods.reportStatusOfTheGame(game);
 })
 
 
 task5Button?.addEventListener('click', () => {
-
+    alert("Tasks 5 & 6 had been done for previous tasks already. Please continue with Task 7.")
 })
 
 task6Button?.addEventListener('click', () => {
-
+    alert("Tasks 5 & 6 had been done for previous tasks already. Please continue with Task 7.")
 })
 
 task7Button?.addEventListener('click', () => {
-
+   
 })
+
 
 task8Button?.addEventListener('click', () => {
 
@@ -148,8 +123,79 @@ task8Button?.addEventListener('click', () => {
 
 
 
+numberOfPlayersButton?.addEventListener('click', () => {
+
+    if(numberOfPlayersButton && addNewPlayersElement){
+        const numberOfNewPlayers: number = parseInt(numberOfPlayersInput.value)
+        const existingNumberOfPlayers = game.players.length
+        const newTotalNumberOfPlayers = existingNumberOfPlayers + numberOfNewPlayers
+        if(newTotalNumberOfPlayers < 2 || newTotalNumberOfPlayers > 7){
+            alert("You need to register between two and seven players. Please try again");
+        } else {
+            let html: string = ''
+            if(numberOfNewPlayers){
+                for (let i = 0; i < numberOfNewPlayers; i++) {
+                    html += `
+                    <input type="text" class="add-new-players-input input" placeholder="Write name of new player here">
+                    `;
+                }
+                addNewPlayersElement.innerHTML = html
+                addNewPlayersButton.classList.remove('hidden')
+            } else {
+                console.error("Error when adding input elements for adding players")
+            }
+        }
+    }
+    console.log("Number of existing players (before adding new players):", game.players.length);
+    
+})
 
 
-//----------------------------------------------------------------
-// FUNCTIONS
-//----------------------------------------------------------------
+
+addNewPlayersButton?.addEventListener('click', () => {
+    const newPlayerNameInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(".add-new-players-input") 
+    console.log("newPlayerNameInputs",newPlayerNameInputs);
+
+    if(newPlayerNameInputs){
+        for (const newPlayerNameInput of newPlayerNameInputs){
+            console.log("newPlayerNameInput.value:",newPlayerNameInput.value);
+            
+            if(newPlayerNameInput.value){
+                
+                const player = new Player(newPlayerNameInput.value)
+                game.addPlayer(player)
+            }
+            else {
+                alert("You missed to provide a name. No worries, the player will be called Pokke.")
+                const player = new Player("Pokke")
+                game.addPlayer(player)
+            }
+        }
+    }
+    console.log("Registered players:")
+    for(const player of game.players){
+        console.log(player.name);
+    }
+    newPlayerNameInputs.forEach(element => element.remove())
+    addNewPlayersButton.classList.add('hidden')
+    numberOfPlayersInput.value = ""
+})
+
+
+
+/* document.getElementById("addPlayersForm")?.addEventListener("submit", (event) => {
+    event.preventDefault(); // Prevent form submission
+    const numPlayersInput = document.getElementById("numPlayers") as HTMLInputElement;
+    const numPlayers = parseInt(numPlayersInput.value, 10);
+    if (isNaN(numPlayers) || numPlayers < 2 || numPlayers > 7) {
+        alert("Please enter a valid number of players between 2 and 7.");
+        return;
+    }
+    game.addPlayers(numPlayers);
+});
+
+
+document.getElementById("addPlayersForm")!.addEventListener("submit", game.validateNumPlayersInput);
+
+document.getElementById("startGameButton")!.addEventListener("click", game.continueGame);
+ */

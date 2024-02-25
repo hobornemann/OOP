@@ -66,6 +66,44 @@ export class Dealer {
         this.deck = new Deck();
     }
 
+
+
+/*     getMethodNames(): (keyof Dealer)[] {
+        return [
+            'getNewDeck',
+            'shuffleDeck',
+            'isThereAreEnoughCardsInTheDeckForARound',
+            'distributeFiveCardsToEachPlayer',
+            'calculateAndShowTheScoreOfEachPlayersHand',
+            'distributeTwoCardsToEachPlayer',
+            'determineAndCommunicateWhichPlayerWonTheRound',
+            'askPlayersToThrowAllTheirCardsToTrashDeck',
+            'transferAllCardsInTrashDeckToCurrentDeck',
+            'askIfPlayersWantToPlayAnotherRound'
+        ];
+    } */
+
+ /*    executeNextStep(methodName: keyof Dealer){
+
+        const methodNames = 
+
+        if (methodName in methodNames) {
+                // Dynamically access and call the method of the dealer object
+            this[methodName]();
+            } else {
+                console.error(`Method ${methodName} does not exist on the dealer object`);
+            }
+        }
+    } */
+
+
+    getNewDeck(game: Game){
+        game.dealer.deck.mainDeck = game.dealer.deck.getNewDeck()
+        let newDeck: Card[] = game.dealer.deck.mainDeck.map(card => ({...card})) 
+        return newDeck
+    }
+
+
     shuffleDeck(cards: Card[]) {
         cards.map(card => {
             card.sortValue = Math.random()
@@ -91,50 +129,137 @@ export class Dealer {
         }
     }
 
+    announceTheWinner(game: Game){
+        const playerWithHighestScore: Player = game.players.reduce((prevPlayer, currentPlayer) => {
+            return (currentPlayer.points > (prevPlayer ? prevPlayer.points : -Infinity)) ? currentPlayer : prevPlayer;
+        }, game.players[0]);
+        const highestScore = playerWithHighestScore.points
+        const winningPlayers = game.players.filter(player => player.points === highestScore)
+        if(winningPlayers.length === 1){
+            console.log(`Congratulations! With ${winningPlayers[0].points} points, ${winningPlayers[0].name} is the winner of this round!`);
+        } else {
+            console.log(`Congratulations! The following players have won the round:`);
+            for (const player of winningPlayers){
+                console.log(`${player.name}`);
+            }       
+        }
+        console.log("Here are the points for all players:");
+        for (const player of game.players){
+            console.log(`${player.name} had ${player.points} points.`)
+        }
+    }
 
     moveTrashDeckIntoMainDeck(){
         this.deck.mainDeck.push(...this.deck.trashDeck)
+        console.log("this.deck.mainDeck after trashDeck added",this.deck.mainDeck.map(card => ({card})))
         this.deck.trashDeck = []
     }
 }
-
-
 
 
 export class Game {
     
     players: Player[];
     dealer: Dealer;
-    gameProcess: string[];
 
     constructor(){
         this.players = [];
         this.dealer = this.addDealer();
-        this.gameProcess = [
-            "checkWhoWantsToPlay",
-            "registerThePlayers"
-        ]
     }
 
-    startGame(){
+    async startGame(game: Game){
 
-        // 
+        try {
+            await this.addPlayers(game)
+            if(game.players.length > 0){
+                console.log("Get new deck:");
+                const deck1 = new Deck();  
+                const newDeck = deck1.getNewDeck();
+                game.dealer.deck.mainDeck = newDeck.map(card => ({ ...card }));  
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Shuffled mainDeck:");
+                const shuffledDeck = game.dealer.shuffleDeck(game.dealer.deck.mainDeck);
+                game.dealer.deck.mainDeck = shuffledDeck.map(card => ({ ...card }));  
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Distributing 5 cards to each player:");
+                game.dealer.distributeXCardsToEachPlayer(game, 5);
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Players throwing away 2 cards each:");
+                game.players.map(player => {
+                    player.throwAwayTheTwoLowestCards(game)
+                })
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Distributing 2 new cards to each player:");
+                game.dealer.distributeXCardsToEachPlayer(game, 2);
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Determining and announcing the winner:");
+                game.dealer.announceTheWinner(game)
+                console.log("Players throwing away all their cards (to trashDeck):");
+                for (const player of game.players){
+                    player.throwAwayAllCards(game)
+                }
+                MiscMethods.reportStatusOfTheGame(game);
+                console.log("Moving trashDeck into mainDeck:");
+                game.dealer.moveTrashDeckIntoMainDeck()    
+                MiscMethods.reportStatusOfTheGame(game);
+
+
+            } else {
+                alert("Please register your players first.");
+            }
+        } catch (error) {
+            console.error("An error occurred:", error); 
+        }
         // game-loop
         // I varje runda ska spelarna kunna välja vilka kort de vill slänga  (indexplats)
-
     }
 
+
+
+
+    getPlayerNames(numPlayers: number): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            const playerNames: string[] = [];
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerName = prompt(`Enter name for Player ${i}:`);
+                if (!playerName) {
+                    reject(new Error("Player name is required."));
+                    return;
+                }
+                playerNames.push(playerName);
+            }
+            resolve(playerNames);
+        });
+    }
+
+    
+    async addPlayers(game: Game){
+        // skapar motsvarande antal instanser av Player-klassen
+        const numPlayersStr = prompt("Enter number of players (2-7):");
+        if (!numPlayersStr) {
+            //throw new Error("Number of players is required.");
+            return
+        }
+        const numPlayers = parseInt(numPlayersStr, 10);
+        if (isNaN(numPlayers) || numPlayers < 2 || numPlayers > 7) {
+            throw new Error("Invalid number of players.");
+        }
+        const playerNames = await game.getPlayerNames(numPlayers);
+        console.log("Player names:", playerNames);
+        for (const playerName of playerNames){
+            // instantiera players
+            const player = new Player(playerName)
+            game.addPlayer(player)
+        }
+    }
+
+    
     addPlayer(newPlayer: Player): Player[]{
+        // skapar motsvarande antal instanser av Player-klassen
         this.players.push(newPlayer)
         return this.players
     }
-/* 
-    addPlayers(newPlayers: Player[]){
-        // uppmana användaren att skriva in antalet spelare (minst 2) och deras namn
-        // skapar motsvarande antal instanser av Player-klassen
 
-        return this.players
-    } */
 
     addDealer(): Dealer{
         let dealer: Dealer = new Dealer()
@@ -143,16 +268,6 @@ export class Game {
 
 }
 
-
-/* export class PokerGame {
-    constructor(players: Player[], deck: Deck, ){
-
-    }
-
-    giveCardsToEachPlayer(){
-
-    }
-} */
 
 
 export class Player {
@@ -207,7 +322,7 @@ export class MiscMethods{
     }
 
 
-    static calculatePointsOnHand(cards: Card[]): Number{
+    static calculatePointsOnHand(cards: Card[]): number{
         let arrayOfPoints: number[] = cards.map(card => {
             return card.value
         })
@@ -216,17 +331,18 @@ export class MiscMethods{
     }
 
 
-    static  reportStatusOfDecksAndPlayerHands(game: Game){
+    static  reportStatusOfTheGame(game: Game){
         // Log the current deck, players' hands and trashdeck
         console.log("MainDeck: ", game.dealer.deck.mainDeck.map(card => ({...card})));
         console.log("TrashDeck: ", game.dealer.deck.trashDeck.map(card => ({...card})));
         game.players.forEach(player => {
-        console.log(`Player: ${player.name}`)
-        player.currentHand.map(card => {
-            console.log(`${card.name} - ${card.value}`);
-        })
-        console.log(`Points: ${MiscMethods.calculatePointsOnHand(player.currentHand)}`);
-    });
+            console.log(`Player: ${player.name}`)
+            player.currentHand.map(card => {
+                console.log(`${card.name} - ${card.value}`);
+            })
+            player.points = MiscMethods.calculatePointsOnHand(player.currentHand)
+            console.log(`Points: ${player.points}`);
+        });
     }
 
 
@@ -256,13 +372,6 @@ export class MiscMethods{
 }
 
 
-/* export class Rounds {
-
-} */
 
 
 
-
-//----------------------------------------------------------------
-// FUNCTIONS
-//----------------------------------------------------------------

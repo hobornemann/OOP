@@ -3,13 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OOP-Assignment</title>
+    <title>Poker</title>
+    <link rel="stylesheet" href="src/styles/poker.css">
     <link rel="icon" href="src/icons/class-scene-svgrepo-com.svg" type="image/svg">
     <script defer type="module" src="src/main.ts"></script>
+    <script defer type="module" src="src/modules/poker-controller.ts"></script>
 </head>
 <body>
-        <br>
-        <h3><a href="color.html">Go to Color Page</a></h3>
-        <h3><a href="poker.html">Go to Poker Page</a></h3>
+    <div class="main-container">
+        <nav class="navigation">
+            <h4><a href="color.html">Go to Color Page</a></h4>
+        </nav>
+        <div class="tasks">
+            <button class="task-1">Task 1</button>
+            <button class="task-2">Task 2</button>
+            <button class="task-3">Task 3</button>
+            <button class="task-4">Task 4</button>
+            <button class="task-5">Task 5</button>
+            <button class="task-6">Task 6</button>
+
+        </div>
+        <h1>Poker</h1>
+
+        <!-- <div  class="user-info hidden">
+            <h3>Hello!</h3>
+            <ul>
+                <li>To play the game, do the following: </li>
+                <li>1. Please add the number of players</li>
+                <li>2. Add their names </li>
+                <li>3. See the game's activities in the web console.</li>
+            </ul>
+        </div> -->
+
+        <!-- <form id="addPlayersForm">
+            <label for="numPlayers">Number of Players (2-7):</label>
+            <input type="number" id="numPlayers" name="numPlayers" min="2" max="7" required><br>
+            <button type="submit">Submit</button>
+        </form> -->
+        <div id="playerInputs"></div>
+        <button id="startGameButton" style="display: none;">Start Game</button>
+
+        <div class="players-container">
+            <!-- <div class="number-of-players hidden">
+                <input type="number" class="number-of-players-input input" placeholder="Write number of players here">
+                <button class="number-of-players-button button">Add number of players</button>
+            </div>
+            <div class="add-new-players">
+                dynamic number of inputs -->
+                <!-- <input type="text" class="add-new-players-input input" placeholder="Write name of new player here">
+                 -->
+            <!-- </div>
+            <button class="add-new-players-button button hidden">Add New Players</button> --> 
+           
+            <!-- <div class="player-cards">
+                
+                <div class="player-card" id="1">
+                    <button class="remove-player">Remove Player</button>
+                    <h4 class="player-name">Slim</h4>
+                    <div class="player-hand">
+                       
+                    </div>
+                    <div class="player-points-total">
+                        <h5>Points:</h5>
+                        <p class="player-points">
+                            
+                        </p>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        
+        <div class="dealer-container">
+            <!-- <button class="task-7">Task 7 - Start the Game</button>
+            <button class="task-8">Task 8</button> -->
+            <!-- <button class="dealer-next-step-button button">Dealer's Next Step</button>
+            <p class="dealer-next-step-p"></p> -->
+        </div>
+        <!-- <div class="deck-cards">
+            <div class="current-deck-column deck-card">
+                <h3>Current Deck</h3>
+                <div class="current-deck"></div>
+            </div>
+            <div class="distributed-deck-column deck-card">
+                <h3>Distributed Deck</h3>
+                <div class="distributed-deck"></div>
+            </div>
+            <div class="players-hands-column deck-card">
+                <h3>Players' Hands</h3>
+                <div class="players-hands"></div>
+            </div>
+            <div class="trash-deck-column deck-card">
+                <h3>Trash Deck</h3>
+                <div class="trash-deck"></div>
+            </div>
+            <div class="print-out-column deck-card">
+                <h3>Print out</h3>
+                <div class="print-out"></div>
+            </div>
+            
+        </div> -->
+        <script window.onload = onPageLoad;> </script> 
 </body>
 </html>
