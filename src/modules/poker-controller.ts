@@ -8,7 +8,7 @@ View based on changes in the Model should be placed in the Controller. These cla
 
 
 import {MiscMethods, Player, Deck} from './poker-model'
-import {} from './poker-view'
+
 import {game} from '../main'
 import {Card} from '../types/poker'
 

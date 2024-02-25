@@ -6,7 +6,6 @@ business logic components, and any other classes related to managing the applica
 */
 
 import {} from './poker-controller'
-import {} from './poker-view'
 import {Card, Color, Face, Value} from '../types/poker'
 //import { mainDeck, trashDeck } from './poker-controller';
 
