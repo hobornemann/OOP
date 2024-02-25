@@ -204,7 +204,7 @@ export class Game {
                 console.log("this.players.length * 7: ",this.players.length * 7)
                 console.log("this.dealer.deck.mainDeck.length:",this.dealer.deck.mainDeck.length);
                 while(this.players.length * 7 < this.dealer.deck.mainDeck.length){
-                    this.playAnotherRound(game)
+                    await this.playAnotherRound(game)       // HEJ SANDRA! VID DEADLINE HADE JAG MISSAT ATT LÄGGA TILL 'AWAIT' PÅ DENNA RAD. FIXADE DET NU EFTER DEADLINE.
                 } 
                 console.log("Moving trashDeck into mainDeck:");
                 game.dealer.moveTrashDeckIntoMainDeck()    
