@@ -67,36 +67,6 @@ export class Dealer {
     }
 
 
-
-/*     getMethodNames(): (keyof Dealer)[] {
-        return [
-            'getNewDeck',
-            'shuffleDeck',
-            'isThereAreEnoughCardsInTheDeckForARound',
-            'distributeFiveCardsToEachPlayer',
-            'calculateAndShowTheScoreOfEachPlayersHand',
-            'distributeTwoCardsToEachPlayer',
-            'determineAndCommunicateWhichPlayerWonTheRound',
-            'askPlayersToThrowAllTheirCardsToTrashDeck',
-            'transferAllCardsInTrashDeckToCurrentDeck',
-            'askIfPlayersWantToPlayAnotherRound'
-        ];
-    } */
-
- /*    executeNextStep(methodName: keyof Dealer){
-
-        const methodNames = 
-
-        if (methodName in methodNames) {
-                // Dynamically access and call the method of the dealer object
-            this[methodName]();
-            } else {
-                console.error(`Method ${methodName} does not exist on the dealer object`);
-            }
-        }
-    } */
-
-
     getNewDeck(game: Game){
         game.dealer.deck.mainDeck = game.dealer.deck.getNewDeck()
         let newDeck: Card[] = game.dealer.deck.mainDeck.map(card => ({...card})) 
@@ -154,6 +124,54 @@ export class Dealer {
         console.log("this.deck.mainDeck after trashDeck added",this.deck.mainDeck.map(card => ({card})))
         this.deck.trashDeck = []
     }
+
+
+    promptForCardsToThrow(playerName: string): Promise<number[]> {
+        return new Promise((resolve, reject) => {
+            const input = prompt(`${playerName}, enter the index numbers (0-4) of the two cards you want to throw away, SEPARATED by a SPACE:`);
+            if (!input) {
+                reject(new Error("Input is required."));
+                return;
+            }
+            const indices = input.split(" ").map(index => parseInt(index));
+            
+            if (indices.length !== 2 || indices.some(isNaN) || indices.some(index => index < 0 || index > 4)) {
+                reject(new Error("Invalid input. Please enter two valid index numbers between 0 and 4 SEPARATED by a SPACE."));
+                return;
+            }
+            resolve(indices);
+        });
+    }
+    
+
+    playerTurn(playerName: string): Promise<number[]> {
+        return new Promise<number[]>(async (resolve, reject) => {
+            try {
+                const indices: number[] = await this.promptForCardsToThrow(playerName);
+                console.log(`${playerName} wants to throw away cards at index ${indices[0]} and ${indices[1]}.`);
+                indices.sort((a, b) => b - a);  // desc order
+                resolve(indices);
+            } catch (error) {
+                console.error("An error occurred:", error);
+                reject(error);
+            }
+        });
+    }
+
+
+    async askPlayersToThrowAwayTwoCards(game: Game) {
+        console.log("Players throwing away 2 cards each:");
+        for (const player of game.players) {
+            const indices = await this.playerTurn(player.name);
+            console.log("indices", indices);
+            if (indices) {
+                for (const index of indices) {
+                    const cardToTrash: Card = player.currentHand.splice(index, 1)[0];
+                    game.dealer.deck.trashDeck.push(cardToTrash);
+                }
+            }
+        }
+    }
 }
 
 
@@ -184,10 +202,19 @@ export class Game {
                 console.log("Distributing 5 cards to each player:");
                 game.dealer.distributeXCardsToEachPlayer(game, 5);
                 MiscMethods.reportStatusOfTheGame(game);
-                console.log("Players throwing away 2 cards each:");
-                game.players.map(player => {
+                
+                
+                await this.dealer.askPlayersToThrowAwayTwoCards(game)
+                
+                
+
+              /*   game.players.map(player => {
                     player.throwAwayTheTwoLowestCards(game)
-                })
+                }) */
+
+               /*  this.dealer.playerTurn("Player 1"); // TODO: */
+
+
                 MiscMethods.reportStatusOfTheGame(game);
                 console.log("Distributing 2 new cards to each player:");
                 game.dealer.distributeXCardsToEachPlayer(game, 2);
@@ -205,7 +232,8 @@ export class Game {
 
 
             } else {
-                alert("Please register your players first.");
+                console.log("Please register your players first.");
+                //alert("Please register your players first.");
             }
         } catch (error) {
             console.error("An error occurred:", error); 
@@ -213,7 +241,6 @@ export class Game {
         // game-loop
         // I varje runda ska spelarna kunna välja vilka kort de vill slänga  (indexplats)
     }
-
 
 
 
@@ -232,7 +259,7 @@ export class Game {
         });
     }
 
-    
+
     async addPlayers(game: Game){
         // skapar motsvarande antal instanser av Player-klassen
         const numPlayersStr = prompt("Enter number of players (2-7):");
